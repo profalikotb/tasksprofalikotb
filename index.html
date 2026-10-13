@@ -4,335 +4,292 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Tasks Pro">
-  <title>Tasks Pro</title>
-
-  <!-- Tailwind CSS & Lucide Icons -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Tasks</title>
   <style>
-    /* Custom iOS Glassmorphism and Transitions */
+    :root {
+      --bg: #F2F2F7;
+      --card-bg: #FFFFFF;
+      --text-active: #1C1C1E;
+      --text-dim: #8E8E93;
+      --border: #E5E5EA;
+      --accent: #34C759;
+      --primary: #007AFF;
+    }
+
     body {
+      margin: 0;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-active);
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-      min-height: 100vh;
     }
 
-    .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    .container {
+      max-width: 500px;
+      margin: 10px auto;
     }
 
-    .glass-input {
-      background: rgba(240, 243, 248, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(210, 215, 225, 0.6);
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
 
-    .task-item {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0;
     }
 
-    .completed-task {
-      opacity: 0.55;
+    .toggle-btn {
+      background: #E5E5EA;
+      color: #007AFF;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
-    .completed-text {
-      text-decoration: line-through;
-      color: #8E8E93;
+    .add-box {
+      display: flex;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 6px 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
     }
 
-    /* Hide scrollbars for clean mobile feel */
-    ::-webkit-scrollbar {
+    .add-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      padding: 8px;
+      background: transparent;
+    }
+
+    .add-box button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 0.5px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #C7C7CC;
+      margin-right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .checkbox svg {
       display: none;
+      width: 14px;
+      height: 14px;
+      fill: white;
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 16px;
+      word-break: break-word;
+    }
+
+    li.completed .checkbox {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    li.completed .checkbox svg {
+      display: block;
+    }
+
+    li.completed .task-title {
+      color: var(--text-dim);
+      text-decoration: line-through;
+    }
+
+    li.hidden {
+      display: none;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #FF3B30;
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0.4;
+    }
+
+    .status-tag {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 12px;
     }
   </style>
 </head>
-<body class="pb-12 pt-safe px-4 sm:px-6 max-w-md mx-auto text-slate-800">
+<body>
 
-  <!-- App Header -->
-  <header class="pt-8 pb-4 flex justify-between items-end">
-    <div>
-      <span class="text-xs font-semibold tracking-wider text-indigo-600 uppercase">My Workspace</span>
-      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Tasks Pro</h1>
-    </div>
-    
-    <!-- Hide/Show Completed Toggle Button -->
-    <button id="toggleCompletedBtn" onclick="toggleHideCompleted()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold glass-card text-indigo-600 active:scale-95 transition-all shadow-sm">
-      <i data-lucide="eye-off" class="w-3.5 h-3.5"></i>
-      <span id="toggleText">Hide Done</span>
-    </button>
-  </header>
-
-  <!-- Task Input Container -->
-  <section class="glass-card rounded-2xl p-4 mb-5 shadow-sm">
-    <div class="flex items-center gap-2 mb-3">
-      <input type="text" id="taskInput" placeholder="Add a new task..." class="glass-input flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-slate-800 placeholder-slate-400 font-medium transition-all" onkeydown="if(event.key === 'Enter') addTask()">
-      <button onclick="addTask()" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white p-2.5 rounded-xl shadow-md transition-all flex items-center justify-center">
-        <i data-lucide="plus" class="w-5 h-5"></i>
-      </button>
-    </div>
-
-    <!-- Quick Options: Priority & Due Date -->
-    <div class="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
-      <!-- Priority Picker -->
-      <div class="flex items-center gap-1">
-        <span class="font-medium mr-1 text-slate-400">Priority:</span>
-        <button onclick="setPriority('Low')" id="prio-Low" class="prio-btn px-2 py-0.5 rounded-md border border-slate-200 bg-white font-medium text-slate-600 transition-all">Low</button>
-        <button onclick="setPriority('Medium')" id="prio-Medium" class="prio-btn px-2 py-0.5 rounded-md border border-slate-200 bg-white font-medium text-slate-600 transition-all">Med</button>
-        <button onclick="setPriority('High')" id="prio-High" class="prio-btn px-2 py-0.5 rounded-md border border-slate-200 bg-white font-medium text-slate-600 transition-all">High</button>
-      </div>
-
-      <!-- Optional Due Date -->
-      <div class="flex items-center gap-1">
-        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
-        <input type="date" id="dueDateInput" class="bg-transparent text-slate-600 text-xs focus:outline-none">
-      </div>
-    </div>
-  </section>
-
-  <!-- Status Counter Bar -->
-  <div class="flex justify-between items-center px-1 mb-3 text-xs font-semibold text-slate-500">
-    <span id="activeCount">0 active tasks</span>
-    <button onclick="toggleBackupModal()" class="text-indigo-600 hover:underline flex items-center gap-1">
-      <i data-lucide="database" class="w-3 h-3"></i> Sync & Backup
-    </button>
+<div class="container">
+  <div class="header-bar">
+    <h1>My Tasks</h1>
+    <button class="toggle-btn" id="toggleDoneBtn" onclick="toggleHideDone()">Hide Done</button>
+  </div>
+  
+  <div class="add-box">
+    <input type="text" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key === 'Enter') addTask()">
+    <button onclick="addTask()">Add</button>
   </div>
 
-  <!-- Task List -->
-  <ul id="taskList" class="space-y-2.5"></ul>
+  <ul id="taskList"></ul>
+  <div class="status-tag" id="statusTag">Syncing with Google Sheets...</div>
+</div>
 
-  <!-- JSON Export/Import Backup Modal -->
-  <div id="backupModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-    <div class="glass-card bg-white/95 rounded-3xl p-5 w-full max-w-xs shadow-2xl">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="font-bold text-slate-800 text-base">Backup & Sync</h3>
-        <button onclick="toggleBackupModal()" class="text-slate-400 hover:text-slate-600">&times;</button>
-      </div>
-      <p class="text-xs text-slate-500 mb-3">Copy your task data JSON to transfer to another device or import existing data.</p>
-      
-      <textarea id="jsonArea" class="w-full h-28 glass-input text-[11px] p-2 rounded-xl font-mono text-slate-700 mb-3 focus:outline-none" placeholder="Paste tasks JSON here..."></textarea>
-      
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="exportJSON()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-xl text-xs font-semibold">Copy JSON</button>
-        <button onclick="importJSON()" class="bg-indigo-600 text-white py-2 rounded-xl text-xs font-semibold">Import</button>
-      </div>
-    </div>
-  </div>
+<script>
+  // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+  const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
-  <script>
-    // State management
-    let tasks = JSON.parse(localStorage.getItem('tasks_pro_data')) || [];
-    let selectedPriority = 'Medium';
-    let hideCompleted = false;
+  let tasks = [];
+  let hideDone = false;
 
-    // Initialize Lucide icons on start
-    window.onload = function() {
-      selectPriority('Medium');
-      render();
-    };
-
-    function saveAndRender() {
-      localStorage.setItem('tasks_pro_data', JSON.stringify(tasks));
-      render();
+  async function fetchTasks() {
+    document.getElementById('statusTag').innerText = "Loading from Google Sheets...";
+    try {
+      const res = await fetch(API_URL);
+      tasks = await res.json();
+      localStorage.setItem('iphone_tasks', JSON.stringify(tasks));
+      document.getElementById('statusTag').innerText = "Synced with Google Sheets";
+    } catch (e) {
+      tasks = JSON.parse(localStorage.getItem('iphone_tasks')) || [];
+      document.getElementById('statusTag').innerText = "Offline Mode (Local)";
     }
+    render();
+  }
 
-    function setPriority(level) {
-      selectedPriority = level;
-      selectPriority(level);
-    }
+  async function syncToGoogleSheets() {
+    document.getElementById('statusTag').innerText = "Saving to Google Sheets...";
+    localStorage.setItem('iphone_tasks', JSON.stringify(tasks));
+    render();
 
-    function selectPriority(level) {
-      document.querySelectorAll('.prio-btn').forEach(btn => {
-        btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600');
-        btn.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tasks: tasks })
       });
-      const activeBtn = document.getElementById(`prio-${level}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
-        activeBtn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
-      }
+      document.getElementById('statusTag').innerText = "Saved to Google Sheets";
+    } catch (e) {
+      document.getElementById('statusTag').innerText = "Saved Locally (Offline)";
     }
+  }
 
-    function addTask() {
-      const input = document.getElementById('taskInput');
-      const text = input.value.trim();
-      const dueDate = document.getElementById('dueDateInput').value;
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
 
-      if (!text) return;
+    tasks.push({
+      id: Date.now(),
+      text: text,
+      priority: 'low',
+      dueDate: '',
+      completed: false,
+      createdAt: new Date().toISOString()
+    });
 
-      const newTask = {
-        id: Date.now(),
-        text: text,
-        completed: false,
-        priority: selectedPriority,
-        dueDate: dueDate || null
-      };
+    input.value = '';
+    syncToGoogleSheets();
+  }
 
-      tasks.unshift(newTask);
-      input.value = '';
-      document.getElementById('dueDateInput').value = '';
-      saveAndRender();
-    }
+  function toggleTask(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    syncToGoogleSheets();
+  }
 
-    function toggleTask(id) {
-      tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-      saveAndRender();
-    }
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    syncToGoogleSheets();
+  }
 
-    function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      saveAndRender();
-    }
+  function toggleHideDone() {
+    hideDone = !hideDone;
+    document.getElementById('toggleDoneBtn').innerText = hideDone ? "Show Done" : "Hide Done";
+    render();
+  }
 
-    function editTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
+  function render() {
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
 
-      const newText = prompt('Edit task:', task.text);
-      if (newText !== null && newText.trim() !== '') {
-        task.text = newText.trim();
-        saveAndRender();
-      }
-    }
+    const sortedTasks = [...tasks].sort((a, b) => a.completed - b.completed);
 
-    function toggleHideCompleted() {
-      hideCompleted = !hideCompleted;
-      const toggleBtn = document.getElementById('toggleCompletedBtn');
-      const toggleText = document.getElementById('toggleText');
-
-      if (hideCompleted) {
-        toggleText.innerText = 'Show Done';
-        toggleBtn.classList.add('bg-indigo-600', 'text-white');
-      } else {
-        toggleText.innerText = 'Hide Done';
-        toggleBtn.classList.remove('bg-indigo-600', 'text-white');
-      }
-      render();
-    }
-
-    function render() {
-      const list = document.getElementById('taskList');
-      list.innerHTML = '';
-
-      // Count active items
-      const activeTasksCount = tasks.filter(t => !t.completed).length;
-      document.getElementById('activeCount').innerText = `${activeTasksCount} active task${activeTasksCount !== 1 ? 's' : ''}`;
-
-      // Sort: Active items top, completed items bottom
-      let sortedTasks = [...tasks].sort((a, b) => a.completed - b.completed);
-
-      // Filter if hide completed is active
-      if (hideCompleted) {
-        sortedTasks = sortedTasks.filter(t => !t.completed);
+    sortedTasks.forEach(task => {
+      const li = document.createElement('li');
+      if (task.completed) {
+        li.classList.add('completed');
+        if (hideDone) li.classList.add('hidden');
       }
 
-      if (sortedTasks.length === 0) {
-        list.innerHTML = `
-          <div class="text-center py-12 text-slate-400">
-            <i data-lucide="check-circle-2" class="w-12 h-12 mx-auto mb-2 opacity-30"></i>
-            <p class="text-sm font-medium">No tasks found</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
+      li.innerHTML = `
+        <div class="checkbox" onclick="toggleTask(${task.id})">
+          <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        </div>
+        <span class="task-title" onclick="toggleTask(${task.id})">${escapeHtml(task.text)}</span>
+        <button class="delete-btn" onclick="deleteTask(${task.id})">&times;</button>
+      `;
 
-      sortedTasks.forEach(task => {
-        const li = document.createElement('li');
-        li.className = `glass-card rounded-2xl p-3.5 flex items-center justify-between gap-3 task-item ${task.completed ? 'completed-task' : ''}`;
+      list.appendChild(li);
+    });
+  }
 
-        // Priority badge styles
-        let prioBadge = '';
-        if (task.priority === 'High') {
-          prioBadge = `<span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">High</span>`;
-        } else if (task.priority === 'Medium') {
-          prioBadge = `<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">Med</span>`;
-        } else {
-          prioBadge = `<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">Low</span>`;
-        }
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[m]);
+  }
 
-        // Due date badge
-        const dateBadge = task.dueDate ? `<span class="text-[10px] text-slate-400 font-medium">${task.dueDate}</span>` : '';
+  fetchTasks();
+</script>
 
-        li.innerHTML = `
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <!-- Circular Toggle Button -->
-            <button onclick="toggleTask(${task.id})" class="w-6 h-6 rounded-full border-2 ${task.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 bg-white'} flex items-center justify-center flex-shrink-0 transition-all active:scale-90">
-              ${task.completed ? '<i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>' : ''}
-            </button>
-
-            <!-- Task Label & Tags -->
-            <div class="flex flex-col min-w-0 flex-1" onclick="editTask(${task.id})">
-              <span class="text-sm font-medium ${task.completed ? 'completed-text' : 'text-slate-800'} truncate cursor-pointer">${escapeHtml(task.text)}</span>
-              <div class="flex items-center gap-2 mt-0.5">
-                ${prioBadge}
-                ${dateBadge}
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-1">
-            <button onclick="editTask(${task.id})" class="p-1.5 text-slate-400 hover:text-indigo-600 active:scale-95 transition-all">
-              <i data-lucide="pencil" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteTask(${task.id})" class="p-1.5 text-slate-400 hover:text-red-500 active:scale-95 transition-all">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        `;
-
-        list.appendChild(li);
-      });
-
-      lucide.createIcons();
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/[&<>"']/g, m => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-      })[m]);
-    }
-
-    // Modal Backup & Export functions
-    function toggleBackupModal() {
-      const modal = document.getElementById('backupModal');
-      modal.classList.toggle('hidden');
-      if (!modal.classList.contains('hidden')) {
-        document.getElementById('jsonArea').value = JSON.stringify(tasks, null, 2);
-      }
-    }
-
-    function exportJSON() {
-      const jsonArea = document.getElementById('jsonArea');
-      jsonArea.select();
-      document.execCommand('copy');
-      alert('Task JSON copied to clipboard!');
-    }
-
-    function importJSON() {
-      try {
-        const jsonText = document.getElementById('jsonArea').value;
-        const parsed = JSON.parse(jsonText);
-        if (Array.isArray(parsed)) {
-          tasks = parsed;
-          saveAndRender();
-          toggleBackupModal();
-        } else {
-          alert('Invalid format. Must be a valid JSON array.');
-        }
-      } catch (e) {
-        alert('Invalid JSON structure.');
-      }
-    }
-  </script>
 </body>
 </html>
