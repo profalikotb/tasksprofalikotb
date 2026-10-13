@@ -186,7 +186,7 @@
 
 <script>
   // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
-  const API_URL = "https://script.google.com/macros/s/AKfycbz_REPLACE_WITH_YOUR_ACTUAL_SCRIPT_URL/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbz9-O80XaNSPeC-eGEX9lARpX4LG6pmOELdbRYyttNgOhMEBiU876Id-NgBr_hcb_A7/exec";
 
   let tasks = [];
   let hideDone = false;
@@ -214,14 +214,19 @@
     render();
 
     try {
-      await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ tasks: tasks })
-      });
-      document.getElementById('statusTag').innerText = "Saved to Google Sheets";
+      const encodedData = encodeURIComponent(JSON.stringify(tasks));
+      const saveUrl = `${API_URL}?action=save&data=${encodedData}`;
+      
+      const res = await fetch(saveUrl);
+      const result = await res.json();
+      
+      if (result.status === "success") {
+        document.getElementById('statusTag').innerText = "Saved to Google Sheets";
+      } else {
+        document.getElementById('statusTag').innerText = "Saved Locally";
+      }
     } catch (e) {
-      document.getElementById('statusTag').innerText = "Saved Locally";
+      document.getElementById('statusTag').innerText = "Saved Locally (Offline)";
     }
   }
 
